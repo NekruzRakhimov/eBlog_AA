@@ -1,0 +1,310 @@
+definitions:
+  controller.CommonError:
+    properties:
+      error:
+        type: string
+    type: object
+  controller.CommonResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  controller.CreateArticleRequest:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    type: object
+  controller.SignInRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  controller.SignUpRequest:
+    properties:
+      address:
+        type: string
+      full_name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  controller.TokensPairResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  models.Article:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+info:
+  contact:
+    email: nekruzrakhimov@icloud.com
+    name: API eBlog
+    url: https://test.com/
+  title: eBlog service
+paths:
+  /api/articles:
+    get:
+      description: Получения списка статей которые принадлежат текущему пользователю
+      parameters:
+      - description: поиск по title
+        in: query
+        name: title
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            items:
+              $ref: '#/definitions/models.Article'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+      security:
+      - BearerAuth: []
+      summary: Получение списка всех статей
+      tags:
+      - Articles
+    post:
+      consumes:
+      - application/json
+      description: Роут для создания новой статьи
+      parameters:
+      - description: данные для создания новой статьи
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CreateArticleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/controller.CommonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+      security:
+      - BearerAuth: []
+      summary: Создать новую статью
+      tags:
+      - Articles
+  /api/articles/{id}:
+    delete:
+      description: Удаление статьи по ID которая принадлежит текущему пользователю
+      parameters:
+      - description: id статьи
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Article'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+      security:
+      - BearerAuth: []
+      summary: Удаление статьи по ID
+      tags:
+      - Articles
+    get:
+      description: Получение статьи по ID которая принадлежит текущему пользователю
+      parameters:
+      - description: id статьи
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Article'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+      security:
+      - BearerAuth: []
+      summary: Получение статьи по ID
+      tags:
+      - Articles
+    put:
+      description: Обновление статьи по ID которая принадлежит текущему пользователю
+      parameters:
+      - description: id статьи
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: данные для обновления статьи
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CreateArticleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Article'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+      security:
+      - BearerAuth: []
+      summary: Обновление статьи по ID
+      tags:
+      - Articles
+  /auth/refresh:
+    get:
+      description: Обновить пару токенов (получить новый access и refresh)
+      parameters:
+      - description: Bearer Refresh Token
+        in: header
+        name: Refresh-Token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.TokensPairResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+      summary: Обновить токены
+      tags:
+      - Auth
+  /auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: Вход в свой аккаунт
+      parameters:
+      - description: данные для входа в аккаунт
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.SignInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.TokensPairResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+      summary: Вход
+      tags:
+      - Auth
+  /auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: Регистрирует нового пользователя
+      parameters:
+      - description: данные для регистрации
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.SignUpRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/controller.CommonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+      summary: Регистрация
+      tags:
+      - Auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

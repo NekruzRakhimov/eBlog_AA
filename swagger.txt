@@ -1,0 +1,5 @@
+1. go get github.com/swaggo/swag@latest
+2. swag init
+3. go get "github.com/swaggo/files"
+4. go get "github.com/swaggo/gin-swagger"
+5. go run main.go
