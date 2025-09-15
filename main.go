@@ -4,6 +4,8 @@ import (
 	"eBlog/internal/configs"
 	"eBlog/internal/controller"
 	"eBlog/internal/db"
+	"eBlog/internal/repository"
+	"eBlog/internal/service"
 	"fmt"
 )
 
@@ -21,22 +23,27 @@ func main() {
 		return
 	}
 
-	if err := db.InitConnection(); err != nil {
+	dbConn, err := db.InitConnection()
+	if err != nil {
 		fmt.Println("Error during database connection initialization: ", err.Error())
 		return
 	}
 
-	if err := db.RunMigrations(); err != nil {
+	if err = db.RunMigrations(dbConn); err != nil {
 		fmt.Println("Error during database migrations: ", err.Error())
 		return
 	}
 
-	if err := controller.InitRoutes(); err != nil {
+	repo := repository.NewRepository(dbConn)
+	svc := service.NewService(repo)
+	ctrl := controller.NewController(svc)
+
+	if err = ctrl.InitRoutes(); err != nil {
 		fmt.Println("Error during http-service initialization: ", err.Error())
 		return
 	}
 
-	if err := db.CloseConnection(); err != nil {
+	if err = db.CloseConnection(dbConn); err != nil {
 		fmt.Println("Error during database connection close: ", err.Error())
 		return
 	}

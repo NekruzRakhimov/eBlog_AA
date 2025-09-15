@@ -8,11 +8,10 @@ import (
 	"os"
 )
 
-var db *sqlx.DB
+//var db *sqlx.DB
 
 // открытие подключения к бд
-
-func InitConnection() error {
+func InitConnection() (*sqlx.DB, error) {
 	connectionConfigs := configs.AppSettings.PostgresParams
 	dbConn, err := sqlx.Connect("postgres",
 		fmt.Sprintf(`port=%s
@@ -27,23 +26,18 @@ func InitConnection() error {
 			os.Getenv("DB_PASSWORD"),
 			connectionConfigs.Database))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	db = dbConn
-	return nil
+	return dbConn, nil
 }
 
 // закрытие подключения
-func CloseConnection() error {
+func CloseConnection(db *sqlx.DB) error {
 	err := db.Close()
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func GetDBConnection() *sqlx.DB {
-	return db
 }

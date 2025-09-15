@@ -2,7 +2,6 @@ package controller
 
 import (
 	"eBlog/internal/models"
-	"eBlog/internal/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -26,14 +25,14 @@ type SignUpRequest struct {
 // @Failure     400 {object} CommonError
 // @Failure     500 {object} CommonError
 // @Router      /auth/sign-up [post]
-func SignUp(c *gin.Context) {
+func (ctrl *Controller) SignUp(c *gin.Context) {
 	var u models.User
 	if err := c.ShouldBindJSON(&u); err != nil {
 		c.JSON(http.StatusBadRequest, CommonError{err.Error()})
 		return
 	}
 
-	if err := service.CreateUser(u); err != nil {
+	if err := ctrl.service.CreateUser(u); err != nil {
 		c.JSON(http.StatusInternalServerError, CommonError{err.Error()})
 		return
 	}
@@ -62,14 +61,14 @@ type TokensPairResponse struct {
 // @Failure     400 {object} CommonError
 // @Failure     500 {object} CommonError
 // @Router      /auth/sign-in [post]
-func SignIn(c *gin.Context) {
+func (ctrl *Controller) SignIn(c *gin.Context) {
 	var input SignInRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, CommonError{err.Error()})
 		return
 	}
 
-	accessToken, refreshToken, err := service.AuthenticateUser(input.Username, input.Password)
+	accessToken, refreshToken, err := ctrl.service.AuthenticateUser(input.Username, input.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, CommonError{err.Error()})
 		return
@@ -90,7 +89,7 @@ func SignIn(c *gin.Context) {
 // @Success     200 {object} TokensPairResponse
 // @Failure     401 {object} CommonError
 // @Router      /auth/refresh [get]
-func RefreshTokenPair(c *gin.Context) {
+func (ctrl *Controller) RefreshTokenPair(c *gin.Context) {
 	header := c.GetHeader("Refresh-Token")
 
 	if header == "" {
@@ -117,7 +116,7 @@ func RefreshTokenPair(c *gin.Context) {
 
 	refreshToken := headerParts[1]
 
-	claims, err := service.ParseToken(refreshToken)
+	claims, err := ctrl.service.ParseToken(refreshToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -130,7 +129,7 @@ func RefreshTokenPair(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := service.GenerateToken(claims.UserID, false)
+	accessToken, err := ctrl.service.GenerateToken(claims.UserID, false)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": err.Error(),
@@ -138,7 +137,7 @@ func RefreshTokenPair(c *gin.Context) {
 		return
 	}
 
-	refreshToken, err = service.GenerateToken(claims.UserID, true)
+	refreshToken, err = ctrl.service.GenerateToken(claims.UserID, true)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": err.Error(),

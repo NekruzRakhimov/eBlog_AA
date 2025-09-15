@@ -1,6 +1,9 @@
 package db
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/jmoiron/sqlx"
+)
 
 const (
 	createUsersTableDDL = `CREATE TABLE IF NOT EXISTS users (
@@ -26,7 +29,7 @@ const (
 	);`
 )
 
-func RunMigrations() error {
+func RunMigrations(db *sqlx.DB) error {
 	_, err := db.Exec(createUsersTableDDL)
 	if err != nil {
 		fmt.Println("error creating users table")

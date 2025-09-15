@@ -1,13 +1,12 @@
 package controller
 
 import (
-	"eBlog/internal/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
 )
 
-func checkUserAuthentication(c *gin.Context) {
+func (ctrl *Controller) checkUserAuthentication(c *gin.Context) {
 	header := c.GetHeader("Authorization")
 
 	if header == "" {
@@ -34,7 +33,7 @@ func checkUserAuthentication(c *gin.Context) {
 
 	accessToken := headerParts[1]
 
-	claims, err := service.ParseToken(accessToken)
+	claims, err := ctrl.service.ParseToken(accessToken)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return

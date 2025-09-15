@@ -2,22 +2,16 @@ package service
 
 import (
 	"eBlog/internal/configs"
+	"eBlog/internal/models"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"os"
 	"time"
 )
 
-// CustomClaims определяет кастомные поля токена
-type CustomClaims struct {
-	UserID         int  `json:"user_id"`
-	IsRefreshToken bool `json:"is_refresh_token"`
-	jwt.StandardClaims
-}
-
 // GenerateToken генерирует JWT токен с кастомными полями
-func GenerateToken(userID int, isRefreshToken bool) (string, error) {
-	claims := CustomClaims{
+func (s *Service) GenerateToken(userID int, isRefreshToken bool) (string, error) {
+	claims := models.CustomClaims{
 		UserID: userID,
 		StandardClaims: jwt.StandardClaims{
 			Issuer: configs.AppSettings.AppParams.ServerName,
@@ -39,8 +33,8 @@ func GenerateToken(userID int, isRefreshToken bool) (string, error) {
 }
 
 // ParseToken парсит JWT токен и возвращает кастомные поля
-func ParseToken(tokenString string) (*CustomClaims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+func (s *Service) ParseToken(tokenString string) (*models.CustomClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &models.CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		// Проверяем метод подписи токена
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -52,7 +46,7 @@ func ParseToken(tokenString string) (*CustomClaims, error) {
 		return nil, err
 	}
 
-	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
+	if claims, ok := token.Claims.(*models.CustomClaims); ok && token.Valid {
 		return claims, nil
 	}
 

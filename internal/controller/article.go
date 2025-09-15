@@ -2,7 +2,6 @@ package controller
 
 import (
 	"eBlog/internal/models"
-	"eBlog/internal/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -26,7 +25,7 @@ type CreateArticleRequest struct {
 // @Failure     400 {object} CommonError
 // @Failure     500 {object} CommonError
 // @Router      /api/articles [post]
-func createArticle(c *gin.Context) {
+func (ctrl *Controller) createArticle(c *gin.Context) {
 	userID := c.GetInt("userID")
 	if userID == 0 {
 		c.JSON(http.StatusUnauthorized, CommonError{"user id not found in context"})
@@ -41,7 +40,7 @@ func createArticle(c *gin.Context) {
 
 	input.UserID = userID
 
-	if err := service.CreateArticle(input); err != nil {
+	if err := ctrl.service.CreateArticle(input); err != nil {
 		c.JSON(http.StatusInternalServerError, CommonError{err.Error()})
 		return
 	}
@@ -60,7 +59,7 @@ func createArticle(c *gin.Context) {
 // @Failure     401 {object} CommonError
 // @Failure     500 {object} CommonError
 // @Router      /api/articles [get]
-func getAllArticles(c *gin.Context) {
+func (ctrl *Controller) getAllArticles(c *gin.Context) {
 	userID := c.GetInt("userID")
 	if userID == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "user id not found in context"})
@@ -69,7 +68,7 @@ func getAllArticles(c *gin.Context) {
 
 	title := c.Query("title")
 
-	articles, err := service.GetAllArticles(userID, title)
+	articles, err := ctrl.service.GetAllArticles(userID, title)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -91,7 +90,7 @@ func getAllArticles(c *gin.Context) {
 // @Failure     401 {object} CommonError
 // @Failure     500 {object} CommonError
 // @Router      /api/articles/{id} [get]
-func getArticleByID(c *gin.Context) {
+func (ctrl *Controller) getArticleByID(c *gin.Context) {
 	userID := c.GetInt("userID")
 	if userID == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "user id not found in context"})
@@ -108,7 +107,7 @@ func getArticleByID(c *gin.Context) {
 		return
 	}
 
-	article, err := service.GetArticleByID(id)
+	article, err := ctrl.service.GetArticleByID(id)
 	if err != nil {
 		if err.Error() == "статья c таким ID не найдена" {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -133,7 +132,7 @@ func getArticleByID(c *gin.Context) {
 // @Failure     401 {object} CommonError
 // @Failure     500 {object} CommonError
 // @Router      /api/articles/{id} [put]
-func updateArticle(c *gin.Context) {
+func (ctrl *Controller) updateArticle(c *gin.Context) {
 	userID := c.GetInt("userID")
 	if userID == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "user id not found in context"})
@@ -166,7 +165,7 @@ func updateArticle(c *gin.Context) {
 
 	input.ID = id
 
-	if err = service.UpdateArticle(input); err != nil {
+	if err = ctrl.service.UpdateArticle(input); err != nil {
 		if err.Error() == "статья c таким ID не найдена" {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		} else {
@@ -189,7 +188,7 @@ func updateArticle(c *gin.Context) {
 // @Failure     401 {object} CommonError
 // @Failure     500 {object} CommonError
 // @Router      /api/articles/{id} [delete]
-func deleteArticle(c *gin.Context) {
+func (ctrl *Controller) deleteArticle(c *gin.Context) {
 	userID := c.GetInt("userID")
 	if userID == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "user id not found in context"})
@@ -203,7 +202,7 @@ func deleteArticle(c *gin.Context) {
 		return
 	}
 
-	if err = service.DeleteArticle(id); err != nil {
+	if err = ctrl.service.DeleteArticle(id); err != nil {
 		if err.Error() == "статья c таким ID не найдена" {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		} else {
