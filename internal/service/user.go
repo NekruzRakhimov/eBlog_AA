@@ -2,7 +2,7 @@ package service
 
 import (
 	"crypto/sha256"
-	"database/sql"
+	"eBlog/internal/errs"
 	"eBlog/internal/models"
 	"encoding/hex"
 	"errors"
@@ -12,12 +12,12 @@ import (
 func (s *Service) CreateUser(u models.User) error {
 	// 1. проверить существует ли такой пользователь
 	dbUser, err := s.repository.GetUserByUsername(u.Username)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+	if err != nil && !errors.Is(err, errs.ErrNotFound) {
 		return err
 	}
 
 	if dbUser.ID != 0 {
-		return errors.New("username already exists")
+		return errs.ErrUsernameAlreadyExists
 	}
 
 	// 2. захещировать пароль
@@ -40,8 +40,8 @@ func (s *Service) AuthenticateUser(username, password string) (accessToken strin
 	// получаем из бд данные
 	u, err := s.repository.GetUserByUsernameAndPassword(username, hashedPassword)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return "", "", errors.New("неправильный логин или пароль")
+		if errors.Is(err, errs.ErrNotFound) {
+			return "", "", errs.ErrIncorrectUsernameOrPassword
 		}
 
 		return "", "", err

@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"eBlog/internal/errs"
 	"eBlog/internal/models"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -23,17 +25,23 @@ type SignUpRequest struct {
 // @Param       request body SignUpRequest true "данные для регистрации"
 // @Success     201 {object} CommonResponse
 // @Failure     400 {object} CommonError
+// @Failure     422 {object} CommonError
 // @Failure     500 {object} CommonError
 // @Router      /auth/sign-up [post]
 func (ctrl *Controller) SignUp(c *gin.Context) {
 	var u models.User
 	if err := c.ShouldBindJSON(&u); err != nil {
-		c.JSON(http.StatusBadRequest, CommonError{err.Error()})
+		ctrl.handleError(c, errors.Join(errs.ErrInvalidRequestBody, err))
+		return
+	}
+
+	if u.FullName == "" || u.Username == "" || u.Password == "" || u.Address == "" {
+		ctrl.handleError(c, errs.ErrFillRequiredFields)
 		return
 	}
 
 	if err := ctrl.service.CreateUser(u); err != nil {
-		c.JSON(http.StatusInternalServerError, CommonError{err.Error()})
+		ctrl.handleError(c, err)
 		return
 	}
 
@@ -59,18 +67,25 @@ type TokensPairResponse struct {
 // @Param       request body SignInRequest true "данные для входа в аккаунт"
 // @Success     200 {object} TokensPairResponse
 // @Failure     400 {object} CommonError
+// @Failure     422 {object} CommonError
+// @Failure     401 {object} CommonError
 // @Failure     500 {object} CommonError
 // @Router      /auth/sign-in [post]
 func (ctrl *Controller) SignIn(c *gin.Context) {
 	var input SignInRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, CommonError{err.Error()})
+		ctrl.handleError(c, errors.Join(errs.ErrInvalidRequestBody, err))
+		return
+	}
+
+	if input.Username == "" || input.Password == "" {
+		ctrl.handleError(c, errs.ErrFillRequiredFields)
 		return
 	}
 
 	accessToken, refreshToken, err := ctrl.service.AuthenticateUser(input.Username, input.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, CommonError{err.Error()})
+		ctrl.handleError(c, err)
 		return
 	}
 

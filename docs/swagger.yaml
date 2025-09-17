@@ -119,6 +119,10 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/controller.CommonError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/controller.CommonError'
         "500":
           description: Internal Server Error
           schema:
@@ -144,6 +148,10 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/models.Article'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.CommonError'
         "401":
           description: Unauthorized
           schema:
@@ -206,8 +214,16 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/models.Article'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.CommonError'
         "401":
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "422":
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/controller.CommonError'
         "500":
@@ -265,6 +281,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/controller.CommonError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/controller.CommonError'
         "500":
           description: Internal Server Error
           schema:
@@ -293,6 +317,10 @@ paths:
             $ref: '#/definitions/controller.CommonResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "422":
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/controller.CommonError'
         "500":
